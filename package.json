@@ -1,0 +1,27 @@
+{
+  "name": "instagram-clone",
+  "version": "1.0.0",
+  "description": "A complete Instagram clone built with modern web technologies",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "start": "./start.sh"
+  },
+  "keywords": [
+    "instagram",
+    "clone",
+    "social-media",
+    "react",
+    "nodejs",
+    "mongodb",
+    "nextjs"
+  ],
+  "author": "Instagram Clone Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
