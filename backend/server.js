@@ -46,7 +46,7 @@ app.use('/api/', limiter);
 sequelize.authenticate()
   .then(() => {
     console.log('✅ Connected to SQLite');
-    return sequelize.sync();
+    return sequelize.sync({ alter: true });
   })
   .then(() => console.log('✅ Database tables synchronized'))
   .catch(err => {
@@ -66,6 +66,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/stories', require('./routes/stories'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/support', require('./routes/support'));
 
 // Socket.IO for real-time features
 const activeUsers = new Map();

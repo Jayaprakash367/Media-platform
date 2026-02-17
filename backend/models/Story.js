@@ -45,20 +45,23 @@ const Story = sequelize.define('Story', {
 
 Story.getActiveStories = async (userIds = []) => {
   const now = new Date();
+  const { Op } = require('sequelize');
+  const User = require('./User');
   return Story.findAll({
     where: {
       userId: userIds,
-      expiresAt: { [sequelize.Sequelize.Op.gt]: now }
+      expiresAt: { [Op.gt]: now }
     },
     order: [['createdAt', 'DESC']],
-    include: [{ association: Story.associations?.user }]
+    include: [{ model: User, as: 'user', attributes: ['id', 'username', 'fullName', 'profilePicture'] }]
   });
 };
 
 Story.getUserStories = async (userId) => {
   const now = new Date();
+  const { Op } = require('sequelize');
   return Story.findAll({
-    where: { userId, expiresAt: { [sequelize.Sequelize.Op.gt]: now } },
+    where: { userId, expiresAt: { [Op.gt]: now } },
     order: [['createdAt', 'DESC']]
   });
 };

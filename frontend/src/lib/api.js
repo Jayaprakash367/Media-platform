@@ -104,6 +104,8 @@ export const postAPI = {
     api.get(`/posts/saved?page=${page}&limit=${limit}`),
   getExplorePosts: (page = 1, limit = 20) => 
     api.get(`/posts/explore?page=${page}&limit=${limit}`),
+  getReels: (page = 1, limit = 20) =>
+    api.get(`/posts/reels?page=${page}&limit=${limit}`),
 };
 
 // Story APIs

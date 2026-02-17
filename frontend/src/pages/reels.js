@@ -283,10 +283,17 @@ const ReelsPage = () => {
   useEffect(() => {
     const fetchReels = async () => {
       try {
-        const response = await postAPI.getExplorePosts(1, 20);
-        const posts = response.data?.data?.posts || response.data?.data || [];
-        // Filter for video posts
-        const videoReels = posts.filter(p => p.mediaType === 'video');
+        // Try dedicated reels endpoint first, fallback to explore
+        let posts = [];
+        try {
+          const response = await postAPI.getReels(1, 20);
+          posts = response.data?.data?.data || response.data?.data?.posts || [];
+        } catch {
+          const response = await postAPI.getExplorePosts(1, 20);
+          posts = response.data?.data?.posts || response.data?.data?.data || [];
+        }
+        // Prefer video posts, but show all if no videos available
+        const videoReels = posts.filter(p => p.mediaType === 'video' || p.isReel);
         setReels(videoReels.length > 0 ? videoReels : posts.slice(0, 10));
       } catch (error) {
         console.error('Failed to fetch reels:', error);

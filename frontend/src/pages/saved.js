@@ -29,7 +29,8 @@ const SavedPage = () => {
   const fetchSavedPosts = async () => {
     try {
       const response = await postAPI.getSavedPosts(1, 50);
-      setSavedPosts(response.data.data.items || []);
+      const responseData = response.data?.data;
+      setSavedPosts(responseData?.data || responseData?.items || responseData?.posts || []);
     } catch (error) {
       console.error('Error fetching saved posts:', error);
       toast.error('Failed to load saved posts');

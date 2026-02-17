@@ -80,14 +80,24 @@ const getFeedPosts = async (req, res) => {
     const followingIds = follows.map((f) => f.followingId);
     followingIds.push(userId);
 
-    // Build visibility filter
+    // Build visibility filter:
+    // - Show all public posts from followed users AND all public posts from anyone (discover)
+    // - Show close_friends posts only if current user is in the author's close friends list
+    // - Always show own posts regardless of visibility
+    const visibilityConditions = [
+      // All public posts (from anyone)
+      { visibility: 'public' },
+      // Own posts always visible
+      { userId: userId }
+    ];
+
+    // Only add close_friends filter if the user actually has close friends
+    if (closeFriends.length > 0) {
+      visibilityConditions.push({ visibility: 'close_friends', userId: closeFriends });
+    }
+
     const whereClause = {
-      userId: followingIds,
-      [Op.or]: [
-        { visibility: 'public' },
-        { visibility: 'close_friends', userId: closeFriends },
-        { userId: userId } // Always show own posts
-      ]
+      [Op.or]: visibilityConditions
     };
 
     const { rows, count } = await Post.findAndCountAll({
@@ -469,6 +479,69 @@ const getExplorePosts = async (req, res) => {
   }
 };
 
+// Get reels (video posts from all users)
+const getReels = async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    const currentUserId = req.user.id;
+    const { skip, limit: limitNum } = paginate(parseInt(page), parseInt(limit));
+
+    const { rows, count } = await Post.findAndCountAll({
+      where: {
+        [Op.or]: [
+          { isReel: true },
+          { mediaType: 'video' }
+        ],
+        visibility: 'public'
+      },
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'username', 'fullName', 'profilePicture', 'isVerified'] },
+        { model: Like, as: 'likes', attributes: ['userId'] },
+        { model: Comment, as: 'comments', attributes: ['id'] }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: limitNum,
+      offset: skip
+    });
+
+    // Get follower counts and following status for each post author
+    const authorIds = [...new Set(rows.map(p => p.userId))];
+    const followerCounts = await Promise.all(
+      authorIds.map(async (authorId) => ({
+        userId: authorId,
+        count: await Follow.count({ where: { followingId: authorId } })
+      }))
+    );
+    const followerCountMap = Object.fromEntries(followerCounts.map(f => [f.userId, f.count]));
+
+    const followingRecords = authorIds.length > 0 ? await Follow.findAll({
+      where: {
+        followerId: currentUserId,
+        followingId: authorIds
+      }
+    }) : [];
+    const followingSet = new Set(followingRecords.map(f => f.followingId));
+
+    const formattedPosts = rows.map((p) => {
+      const formatted = formatPost(p, currentUserId);
+      if (formatted.user) {
+        formatted.user.followersCount = followerCountMap[formatted.user.id] || 0;
+        formatted.user.isFollowing = followingSet.has(formatted.user.id);
+      }
+      return formatted;
+    });
+
+    const response = createPaginationResponse(formattedPosts, count, parseInt(page), parseInt(limit));
+    res.json({ success: true, data: response });
+  } catch (error) {
+    console.error('Get reels error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching reels'
+    });
+  }
+};
+
 module.exports = {
   createPost,
   getFeedPosts,
@@ -480,5 +553,6 @@ module.exports = {
   deletePost,
   toggleSave,
   getSavedPosts,
-  getExplorePosts
+  getExplorePosts,
+  getReels
 };

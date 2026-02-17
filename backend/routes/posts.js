@@ -14,13 +14,15 @@ const {
   deletePost,
   toggleSave,
   getSavedPosts,
-  getExplorePosts
+  getExplorePosts,
+  getReels
 } = require('../controllers/postController');
 
 // Post routes
 router.post('/', auth, uploadMedia, validatePost, handleValidationErrors, createPost);
 router.get('/feed', auth, getFeedPosts);
 router.get('/explore', auth, getExplorePosts);
+router.get('/reels', auth, getReels);
 router.get('/saved', auth, getSavedPosts);
 router.get('/user/:userId', auth, getUserPosts);
 router.get('/:postId', auth, validateObjectId('postId'), getPost);

@@ -61,7 +61,8 @@ const HomePage = () => {
       setHasMore(responseData?.pagination?.hasNextPage || false);
     } catch (error) {
       console.error('Failed to fetch posts:', error);
-      if (error.response?.status !== 401) {
+      // Only show error toast for actual server errors, not empty feeds or auth issues
+      if (error.response?.status && error.response.status >= 500) {
         toast.error('Failed to load posts');
       }
     } finally {

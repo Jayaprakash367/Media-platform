@@ -24,7 +24,7 @@ const Notification = sequelize.define('Notification', {
     }
   },
   type: {
-    type: DataTypes.ENUM('like', 'comment', 'follow', 'message', 'mention'),
+    type: DataTypes.STRING,
     allowNull: false
   },
   relatedPostId: {
