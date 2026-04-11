@@ -246,6 +246,9 @@ This project is for educational purposes only. Not intended for commercial use.
 - The developer community for tutorials and resources
 
 ---
-cd "c:\Users\jayaprakash.k\Downloads\ca7014cf-e60e-401c-9929-a846b5838ef0\instagram-clone\backend" && npm start
- cd "c:\Users\jayaprakash.k\Downloads\ca7014cf-e60e-401c-9929-a846b5838ef0\instagram-clone\frontend" && npm run dev
+Run the server:
+ npm run dev
+ > instagram-clone@1.0.0 dev
+ > concurrently "npm run backend" "npm run frontend"
+
 **Built with ❤️ using modern web technologies**
